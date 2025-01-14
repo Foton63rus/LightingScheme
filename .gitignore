@@ -1,0 +1,8 @@
+#folders
+/.vite
+
+
+#formats
+*.glb
+*.gltf
+*.fbx
