@@ -27,8 +27,22 @@ export class Arrangement{
                 element.model,
 
                 function ( gltf ) {
-                    console.log("www");
-                    scene.add( gltf.scene );
+                    let currentObject = gltf.scene;
+                    if(element.rotation){
+                        currentObject.rotateY(Math.PI/180*element.rotation);
+                    }
+                    if(element.position){
+                        let pos = element.position
+                        currentObject.position.set(pos.x,0,pos.z);
+                    }
+                    if(element.head_rotation){
+                        currentObject.children.forEach(x => {
+                            if(x.name == "Head"){
+                                x.rotateX(Math.PI/180*element.head_rotation);
+                            }
+                        });
+                    }
+                    scene.add( currentObject );
                     
                     gltf.animations; // Array<THREE.AnimationClip>
                     gltf.scene; // THREE.Group
