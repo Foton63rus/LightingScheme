@@ -21,19 +21,35 @@ export class Arrangement{
             console.log('no objects');
             return;
         }
+        this._focusCamera(scene);
         this.objects.forEach(element => {
             glbLoader.load(
-                // resource URL like '/skate.glb'
+                // resource URL like '/modelname.glb'
                 element.model,
 
                 function ( gltf ) {
                     let currentObject = gltf.scene;
-                    if(element.rotation){
-                        currentObject.rotateY(Math.PI/180*element.rotation);
-                    }
                     if(element.position){
                         let pos = element.position
-                        currentObject.position.set(pos.x,0,pos.z);
+                        currentObject.position.set(pos.x,0,-pos.z);
+                    }
+                    if(element.height){
+                        let height0;
+                        currentObject.children.forEach(x => {
+                            if(x.name == "Lift"){
+                                height0 = x.position.y;
+                                x.scale.setY(element.height);
+                                
+                            }
+                        });
+                        currentObject.children.forEach(x => {
+                            if(x.name == "Head"){
+                                x.position.setY(height0 + element.height);
+                            }
+                        });
+                    }
+                    if(element.rotation){
+                        currentObject.rotateY(-Math.PI/180*element.rotation);
                     }
                     if(element.head_rotation){
                         currentObject.children.forEach(x => {
@@ -62,5 +78,24 @@ export class Arrangement{
                 }
             ); 
         });
+    }
+
+    _calculateBounds(){
+        let xmin, xmax, zmin, zmax = null;
+        this.objects.forEach(element => {
+            xmin = (xmin == null || element.position.x < xmin) ? element.position.x : xmin;
+            xmax = (xmax == null || element.position.x > xmax) ? element.position.x : xmax;
+            zmin = (zmin == null || element.position.z < zmin) ? element.position.z : zmin;
+            zmax = (zmax == null || element.position.z > zmax) ? element.position.z : zmax;
+        });
+        return {xmin: xmin, xmax: xmax, zmin: zmin, zmax: zmax}
+    }
+
+    _focusCamera(scene){
+        var camera = scene.getObjectsByProperty('type', 'PerspectiveCamera')[0];
+        var bounds = this._calculateBounds();
+        var target = new THREE.Vector3((bounds.xmin+bounds.xmax)/2, 0, -(bounds.zmin+bounds.zmax)/2);
+        camera.lookAt(target);
+        return null;
     }
 }
