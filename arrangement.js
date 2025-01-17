@@ -13,17 +13,16 @@ export class Arrangement{
         jsonObject.objects.forEach(element => {
             this.objects.push(element);
         });
-        console.log(this.objects);
     }
 
-    loadObjects2Scene(scene, glbLoader){
+    loadObjects2Scene(settings){
         if(this.objects.length == 0){
             console.log('no objects');
             return;
         }
-        this._focusCamera(scene);
+        this._focusCamera(settings);
         this.objects.forEach(element => {
-            glbLoader.load(
+            settings.glbLoader.load(
                 // resource URL like '/modelname.glb'
                 element.model,
 
@@ -58,15 +57,14 @@ export class Arrangement{
                             }
                         });
                     }
-                    scene.add( currentObject );
+                    settings.scene.add( currentObject );
+                    settings.objects[currentObject.uuid] = currentObject;
                     
                     gltf.animations; // Array<THREE.AnimationClip>
                     gltf.scene; // THREE.Group
                     gltf.scenes; // Array<THREE.Group>
                     gltf.cameras; // Array<THREE.Camera>
                     gltf.asset; // Object
-
-                    console.log(gltf.scene);
                 },
                 // called while loading is progressing
                 function ( xhr ) {
@@ -91,10 +89,12 @@ export class Arrangement{
         return {xmin: xmin, xmax: xmax, zmin: zmin, zmax: zmax}
     }
 
-    _focusCamera(scene){
-        var camera = scene.getObjectsByProperty('type', 'PerspectiveCamera')[0];
+    _focusCamera(settings){
+        var camera = settings.camera;
         var bounds = this._calculateBounds();
         var target = new THREE.Vector3((bounds.xmin+bounds.xmax)/2, 0, -(bounds.zmin+bounds.zmax)/2);
+        var maxWide = Math.max((bounds.xmax-bounds.xmin), (bounds.zmax-bounds.zmin));
+        camera.position.set(target.x, maxWide, -target.z+2);
         camera.lookAt(target);
         return null;
     }
