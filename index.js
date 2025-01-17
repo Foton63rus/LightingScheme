@@ -4,17 +4,18 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { GLTFExporter } from "three/examples/jsm/exporters/GLTFExporter";
 import { USDZExporter } from 'three/addons/exporters/USDZExporter.js';
 import { SceneJSONParser} from './sceneJSONParser.js';
-import * as ArrangementLoader from "./arrangement.js";
-import {SceneColor} from "./scenecolor.js";
+import * as Arrangement from "./arrangement.js";
+
+import {SceneManager} from "./SceneManager.js";
 
 import testJSON from './testObjects.json';
 
-let renderer, scene3d, camera;
-let glbLoader;
+let renderer
+
 let settings = {
   objects: {}
 };
-
+let scene_manager;
 
 init();
 render();
@@ -27,7 +28,7 @@ function onDocumentMouseDown( event ) {
                           -( event.clientY / window.innerHeight ) * 2 + 1,  
                           0.5 );     
   var raycaster =  new THREE.Raycaster();                                        
-  raycaster.setFromCamera( mouse3D, camera );
+  raycaster.setFromCamera( mouse3D, scene_manager.camera );
   var intersects = raycaster.intersectObjects( Object.values(settings.objects) );
   //console.log(settings.objects);
   if ( intersects.length > 0 ) {
@@ -49,61 +50,23 @@ function init() {
   renderer.setSize( window.innerWidth, window.innerHeight );
   document.body.appendChild( renderer.domElement );
 
-  // scene
-  scene3d = new THREE.Scene();
-  settings.scene = scene3d;
-  scene3d.background = new THREE.Color( 0x111111 );
-
-  // camera
-  camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 1, 1000 );
-  settings.camera = camera;
-  camera.position.set( 0, 5, 0 );
-  camera.scale.set(1, 1, 1);
-  scene3d.add( camera );
-
+  scene_manager = new SceneManager(settings);
+  scene_manager.createTestObj();
+  console.log(scene_manager);
 
   // controls
-  var controls = new OrbitControls( camera, renderer.domElement );
+  var controls = new OrbitControls( scene_manager.camera, renderer.domElement );
   controls.addEventListener( 'change', render );
   controls.minDistance = 10;
   controls.maxDistance = 50;
 
-  // ambient
-  //scene.add( new THREE.AmbientLight( 0xffffff, 0.1 ) );
-
-  // light
-  var light = new THREE.PointLight( 0xffffff, 100 );
-  camera.add( light );
-
-  glbLoader = new GLTFLoader();
-  settings.glbLoader = glbLoader;
-
-  let arrangement = new ArrangementLoader.Arrangement();
+  let arrangement = new Arrangement.Arrangement();
   arrangement.addObjects(testJSON);
   arrangement.loadObjects2Scene(settings);
-
-  createTestObj();
 
   render();
 }
 
-function createTestObj(){
-  const geometry = new THREE.BoxGeometry( 0.5, 0.5, 0.5 ); 
-  const material = new THREE.MeshBasicMaterial( ); 
-  console.log(SceneColor);
-  material.color = (SceneColor.green);
-  const material2 = new THREE.MeshBasicMaterial( {color: 0xff0000} ); 
-  const material3 = new THREE.MeshBasicMaterial( {color: 0x0000ff} ); 
-  const cube = new THREE.Mesh( geometry, material ); 
-  const cube2 = new THREE.Mesh( geometry, material2 ); 
-  const cube3 = new THREE.Mesh( geometry, material3 );
-  cube2.position.set(5,0,0);
-  cube3.position.set(0,0,-5);
-  scene3d.add( cube );
-  scene3d.add( cube2 );
-  scene3d.add( cube3 );
-}
-
 function render() {
-	renderer.render( scene3d, camera );
+	renderer.render( scene_manager.scene3d, scene_manager.camera );
 }
