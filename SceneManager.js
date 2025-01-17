@@ -1,11 +1,22 @@
 import * as THREE from "three";
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import {SceneColor} from "./scenecolor.js";
 
 export class SceneManager{
     settings = {};
     camera = null;
     scene3d = null;
+
+    colors = {
+        "red":      {r:1, g:0, b:0},
+        "orange":   {r:1, g:0.5, b:0},
+        "yellow":   {r:1, g:1, b:0},
+        "green":    {r:0, g:1, b:0},   
+        "lightblue":{r:0, g:0.5, b:1},  
+        "blue":     {r:0, g:0, b:1},  
+        "pink":     {r:1, g:0, b:0.5},  
+        "violet":   {r:1, g:0, b:1},  
+        "white":   {r:1, g:1, b:1}, 
+    }
     
     constructor(settings){
         this.settings = settings;
@@ -61,15 +72,28 @@ export class SceneManager{
 
     setPointer(object){
         console.log(this.settings.pointerModel);
+        console.log(object);
+
         if(!this.settings.pointerModel) return;
 
-        if(this.settings.pointerModel.parent == this.scene3d){
-            
-        }else{
+        if(this.settings.pointerModel.parent != this.scene3d){
             this.scene3d.add(this.settings.pointerModel);
         }
+
         const boxSize = new THREE.Box3().setFromObject( object ); 
         this.settings.pointerModel.position.set( object.position.x, boxSize.getSize(new THREE.Vector3()).y + 0.5, object.position.z );
+
+        let currentColor = this.colors[object.mark];
+        let currentMaterial = this.settings.pointerModel.children[0].material;
+        console.log(currentMaterial);
+        currentMaterial.color.setRGB( currentColor.r, currentColor.g, currentColor.b );
+        currentMaterial.emissive.setRGB( currentColor.r, currentColor.g, currentColor.b );
+    }
+
+    clearPointer(){
+        if(this.settings.pointerModel.parent == this.scene3d){
+            this.scene3d.remove(this.settings.pointerModel);
+        }
     }
 
     animate(){

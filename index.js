@@ -45,6 +45,8 @@ function onDocumentMouseDown( event ) {
       //intersects[ 0 ].object.material.color.setHex( Math.random() * 0xffffff );
 
     scene_manager.setPointer(currentObject);
+  }else{
+    scene_manager.clearPointer();
   }
 }
 

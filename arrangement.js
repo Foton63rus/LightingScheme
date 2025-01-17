@@ -57,6 +57,9 @@ export class Arrangement{
                             }
                         });
                     }
+                    if(element.mark){
+                        currentObject.mark = element.mark;
+                    }
                     settings.scene.add( currentObject );
                     settings.objects[currentObject.uuid] = currentObject;
                     
