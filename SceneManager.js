@@ -29,6 +29,17 @@ export class SceneManager{
         // loaders
         let glbLoader = new GLTFLoader();
         settings.glbLoader = glbLoader;
+
+        settings.glbLoader.load(
+            "./pointer.glb",
+            function ( gltf ) {
+                settings.pointerModel = gltf.scene;
+            },
+            function ( xhr ) { },
+            function ( error ) {
+                console.log( `An error happened: ${error}` );
+            }
+        ); 
     }
 
     createTestObj(){
@@ -46,5 +57,24 @@ export class SceneManager{
         this.scene3d.add( cube );
         this.scene3d.add( cube2 );
         this.scene3d.add( cube3 );
-      }
+    }
+
+    setPointer(object){
+        console.log(this.settings.pointerModel);
+        if(!this.settings.pointerModel) return;
+
+        if(this.settings.pointerModel.parent == this.scene3d){
+            
+        }else{
+            this.scene3d.add(this.settings.pointerModel);
+        }
+        const boxSize = new THREE.Box3().setFromObject( object ); 
+        this.settings.pointerModel.position.set( object.position.x, boxSize.getSize(new THREE.Vector3()).y + 0.5, object.position.z );
+    }
+
+    animate(){
+        if(this.settings.pointerModel){
+            this.settings.pointerModel.rotation.y -= 0.1;
+        }
+    }
 }

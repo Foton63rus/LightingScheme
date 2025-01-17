@@ -17,6 +17,10 @@ let settings = {
 };
 let scene_manager;
 
+let clock = new THREE.Clock();
+let delta = 0;
+let interval = 1 / 30;
+
 init();
 render();
 
@@ -39,6 +43,8 @@ function onDocumentMouseDown( event ) {
     console.log(boxSize.getSize(new THREE.Vector3()));
     console.log(currentObject);
       //intersects[ 0 ].object.material.color.setHex( Math.random() * 0xffffff );
+
+    scene_manager.setPointer(currentObject);
   }
 }
 
@@ -68,5 +74,12 @@ function init() {
 }
 
 function render() {
-	renderer.render( scene_manager.scene3d, scene_manager.camera );
+  requestAnimationFrame(render);
+  delta += clock.getDelta();
+  if (delta  > interval) {
+    scene_manager.animate();
+    renderer.render( scene_manager.scene3d, scene_manager.camera );
+
+    delta = delta % interval;
+  }
 }
