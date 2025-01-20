@@ -15,7 +15,7 @@ export class SceneManager{
         "blue":     {r:0, g:0, b:1},  
         "pink":     {r:1, g:0, b:0.5},  
         "violet":   {r:1, g:0, b:1},  
-        "white":   {r:1, g:1, b:1}, 
+        "white":    {r:1, g:1, b:1}, 
     }
     
     constructor(settings){
@@ -55,9 +55,7 @@ export class SceneManager{
 
     createTestObj(){
         const geometry = new THREE.BoxGeometry( 0.5, 0.5, 0.5 ); 
-        const material = new THREE.MeshBasicMaterial( ); 
-        //console.log(SceneColor);
-        //material.color = (SceneColor.green);
+        const material = new THREE.MeshBasicMaterial( {color: 0x00ff00}); 
         const material2 = new THREE.MeshBasicMaterial( {color: 0xff0000} ); 
         const material3 = new THREE.MeshBasicMaterial( {color: 0x0000ff} ); 
         const cube = new THREE.Mesh( geometry, material ); 

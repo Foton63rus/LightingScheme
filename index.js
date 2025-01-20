@@ -38,10 +38,10 @@ function onDocumentMouseDown( event ) {
   if ( intersects.length > 0 ) {
     let currentObject = intersects[ 0 ].object.parent;
     currentObject = currentObject.name == "Scene" ? currentObject : currentObject.parent;
-    currentObject = currentObject.name == "Scene" ? currentObject : currentObject.parent;
+    currentObject = currentObject.name == "Scene" ? currentObject : currentObject.parent; //need too
     const boxSize = new THREE.Box3().setFromObject( currentObject ); 
     console.log(boxSize.getSize(new THREE.Vector3()));
-    console.log(currentObject);
+    currentObject.onClick();
       //intersects[ 0 ].object.material.color.setHex( Math.random() * 0xffffff );
 
     scene_manager.setPointer(currentObject);

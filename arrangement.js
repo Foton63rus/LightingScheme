@@ -6,6 +6,8 @@ export class Arrangement{
 
     constructor(){
         this.objects = [];
+
+        
     }
 
     addObjects(jsonObject){
@@ -28,6 +30,12 @@ export class Arrangement{
 
                 function ( gltf ) {
                     let currentObject = gltf.scene;
+                    if(element.id){
+                        currentObject.objid = element.id;
+                        currentObject.onClick = () => {
+                            console.log(`on click object: ${currentObject.objid}`);
+                        }
+                    }
                     if(element.position){
                         let pos = element.position
                         currentObject.position.set(pos.x,0,-pos.z);
