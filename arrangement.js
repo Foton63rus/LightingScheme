@@ -6,8 +6,6 @@ export class Arrangement{
 
     constructor(){
         this.objects = [];
-
-        
     }
 
     addObjects(jsonObject){
@@ -67,6 +65,15 @@ export class Arrangement{
                     }
                     if(element.mark){
                         currentObject.mark = element.mark;
+                        const geometry = new THREE.SphereGeometry( 0.25, 8, 8 ); 
+                        const material = new THREE.MeshBasicMaterial({color: 0xFF0000});
+                        const mark_color = settings.color[element.mark];
+                        material.color.setRGB(mark_color.r, mark_color.g, mark_color.b);
+                        const sphere = new THREE.Mesh( geometry, material ); 
+                        const boxSize = new THREE.Box3().setFromObject( currentObject ); 
+                        sphere.position.set( 0, boxSize.getSize(new THREE.Vector3()).y + 0.5, 0 );
+                        sphere.name = "mark";
+                        currentObject.add(sphere);
                     }
                     settings.scene.add( currentObject );
                     settings.objects[currentObject.uuid] = currentObject;
