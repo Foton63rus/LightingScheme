@@ -1,9 +1,5 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { GLTFExporter } from "three/examples/jsm/exporters/GLTFExporter";
-import { USDZExporter } from 'three/addons/exporters/USDZExporter.js';
-import { SceneJSONParser} from './sceneJSONParser.js';
 import * as Arrangement from "./arrangement.js";
 import {SceneManager} from "./SceneManager.js";
 
@@ -36,6 +32,7 @@ render();
 
 document.addEventListener( 'mousedown', onDocumentMouseDown );
 document.getElementById('btn_glb_convert').onclick = glbConvert;
+document.getElementById('btn_usdz_convert').onclick = usdzConvert;
 
 function onDocumentMouseDown( event ) {    
   event.preventDefault();
@@ -97,4 +94,10 @@ function render() {
 
 function glbConvert(){
   scene_manager.deleteMarkObjects();
+  scene_manager.downloadGLTF();
+}
+
+function usdzConvert(){
+  scene_manager.deleteMarkObjects();
+  scene_manager.downloadUSDZ();
 }

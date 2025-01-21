@@ -1,5 +1,7 @@
 import * as THREE from "three";
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { GLTFExporter } from "three/examples/jsm/exporters/GLTFExporter";
+import { USDZExporter } from 'three/addons/exporters/USDZExporter.js';
 
 export class SceneManager{
     settings = {};
@@ -43,11 +45,15 @@ export class SceneManager{
     }
 
     deleteMarkObjects(){
-        console.log("element");
-        for (let index = 0; index < this.scene3d.children.length; index++) {
-            const element = array[index];
-            console.log(element.name);
-        }
+        this.scene3d.children.forEach(element => {
+            if(element.type === "Group"){
+                element.children.forEach( obj => {
+                    if(obj.name === "mark"){
+                        element.remove(obj);
+                    }
+                })
+            }
+        });
     }
 
     createTestObj(){
@@ -91,6 +97,37 @@ export class SceneManager{
         }
         
     }
+
+    downloadGLTF() {
+        const exporter = new GLTFExporter();
+        exporter.parse(this.scene3d, function (gltfJson) {
+            //console.log(gltfJson);
+            const jsonString = JSON.stringify(gltfJson);
+            //console.log(jsonString);
+            const link = document.createElement('a');
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            const blob = new Blob([jsonString], { type: "application/json" });
+            link.href = URL.createObjectURL( blob );
+            link.download = "scene.glb";
+            link.click();
+            console.log("Download requested");
+        }, { binary: true});
+      }
+
+      async downloadUSDZ() {
+        const exporter = new USDZExporter();
+        const arraybuffer = await exporter.parseAsync( this.scene3d );
+        const blob = new Blob( [ arraybuffer ], { type: 'application/octet-stream' } );
+        const link = document.createElement('a');
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.href = URL.createObjectURL( blob );
+        const jsonString = JSON.stringify(blob);
+        link.download = "scene.usdz";
+        link.click();
+        console.log("Download requested");
+      }
 
     animate(){
         if(this.settings.pointerModel){
