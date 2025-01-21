@@ -1,5 +1,6 @@
 #folders
 /.vite
+/assets
 /dist
 /node_modules
 
