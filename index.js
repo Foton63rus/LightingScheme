@@ -5,7 +5,6 @@ import { GLTFExporter } from "three/examples/jsm/exporters/GLTFExporter";
 import { USDZExporter } from 'three/addons/exporters/USDZExporter.js';
 import { SceneJSONParser} from './sceneJSONParser.js';
 import * as Arrangement from "./arrangement.js";
-
 import {SceneManager} from "./SceneManager.js";
 
 import testJSON from './testObjects.json';
@@ -36,6 +35,7 @@ init();
 render();
 
 document.addEventListener( 'mousedown', onDocumentMouseDown );
+document.getElementById('btn_glb_convert').onclick = glbConvert;
 
 function onDocumentMouseDown( event ) {    
   event.preventDefault();
@@ -51,9 +51,7 @@ function onDocumentMouseDown( event ) {
     currentObject = currentObject.name == "Scene" ? currentObject : currentObject.parent;
     currentObject = currentObject.name == "Scene" ? currentObject : currentObject.parent; //need too
     const boxSize = new THREE.Box3().setFromObject( currentObject ); 
-    console.log(boxSize.getSize(new THREE.Vector3()));
     currentObject.onClick();
-      //intersects[ 0 ].object.material.color.setHex( Math.random() * 0xffffff );
 
     scene_manager.setPointer(currentObject);
   }else{
@@ -70,7 +68,7 @@ function init() {
   document.body.appendChild( renderer.domElement );
 
   scene_manager = new SceneManager(settings);
-  scene_manager.createTestObj();
+  //scene_manager.createTestObj();
   console.log(scene_manager);
 
   // controls
@@ -95,4 +93,8 @@ function render() {
 
     delta = delta % interval;
   }
+}
+
+function glbConvert(){
+  scene_manager.deleteMarkObjects();
 }

@@ -11,8 +11,9 @@ export class SceneManager{
 
         // scene
         this.scene3d = new THREE.Scene();
-        settings.scene = this.scene3d;
-        this.scene3d.background = new THREE.Color( 0x111111 );
+        this.settings.scene = this.scene3d;
+        this.settings.objects = {};
+        this.scene3d.background = new THREE.Color( 0xffffff );
 
         // camera
         this.camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 1, 1000 );
@@ -30,7 +31,7 @@ export class SceneManager{
         settings.glbLoader = glbLoader;
 
         settings.glbLoader.load(
-            "./pointer.glb",
+            "assets/models/pointer.glb",
             function ( gltf ) {
                 settings.pointerModel = gltf.scene;
             },
@@ -39,6 +40,14 @@ export class SceneManager{
                 console.log( `An error happened: ${error}` );
             }
         ); 
+    }
+
+    deleteMarkObjects(){
+        console.log("element");
+        for (let index = 0; index < this.scene3d.children.length; index++) {
+            const element = array[index];
+            console.log(element.name);
+        }
     }
 
     createTestObj(){
@@ -57,9 +66,6 @@ export class SceneManager{
     }
 
     setPointer(object){
-        console.log(this.settings.pointerModel);
-        console.log(object);
-
         if(!this.settings.pointerModel) return;
 
         if(this.settings.pointerModel.parent != this.scene3d){
@@ -71,15 +77,19 @@ export class SceneManager{
 
         let currentColor = this.settings.color[object.mark];
         let currentMaterial = this.settings.pointerModel.children[0].material;
-        console.log(currentMaterial);
         currentMaterial.color.setRGB( currentColor.r, currentColor.g, currentColor.b );
         currentMaterial.emissive.setRGB( currentColor.r, currentColor.g, currentColor.b );
     }
 
     clearPointer(){
-        if(this.settings.pointerModel.parent == this.scene3d){
-            this.scene3d.remove(this.settings.pointerModel);
+        if(this.settings.pointerModel){
+            if(this.settings.pointerModel.parent == this.scene3d){
+                this.scene3d.remove(this.settings.pointerModel);
+            }
+        }else{
+            console.log("pointer model 404");
         }
+        
     }
 
     animate(){

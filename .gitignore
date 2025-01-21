@@ -1,5 +1,7 @@
 #folders
 /.vite
+/dist
+/node_modules
 
 
 #formats
