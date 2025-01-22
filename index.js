@@ -77,7 +77,11 @@ function init() {
   let arrangement = new Arrangement.Arrangement();
   arrangement.addObjects(testJSON);
   arrangement.loadObjects2Scene(settings);
-
+  var bounds = arrangement.calculateBounds();
+  var target = arrangement.centerScene(bounds);
+  controls.target = target;
+  controls.update();
+  
   render();
 }
 

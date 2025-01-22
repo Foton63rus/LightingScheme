@@ -96,7 +96,7 @@ export class Arrangement{
         });
     }
 
-    _calculateBounds(){
+    calculateBounds(){
         let xmin, xmax, zmin, zmax = null;
         this.objects.forEach(element => {
             xmin = (xmin == null || element.position.x < xmin) ? element.position.x : xmin;
@@ -107,12 +107,16 @@ export class Arrangement{
         return {xmin: xmin, xmax: xmax, zmin: zmin, zmax: zmax}
     }
 
+    centerScene(bounds){
+        return new THREE.Vector3((bounds.xmin+bounds.xmax)/2, 0, -(bounds.zmin+bounds.zmax)/2);
+    }
+
     _focusCamera(settings){
         var camera = settings.camera;
-        var bounds = this._calculateBounds();
-        var target = new THREE.Vector3((bounds.xmin+bounds.xmax)/2, 0, -(bounds.zmin+bounds.zmax)/2);
-        var maxWide = Math.max((bounds.xmax-bounds.xmin), (bounds.zmax-bounds.zmin));
-        camera.position.set(target.x, maxWide, -target.z+2);
+        var bounds = this.calculateBounds();
+        var target = this.centerScene(bounds);
+        var maxHeight = Math.max((bounds.xmax-bounds.xmin), (bounds.zmax-bounds.zmin));
+        camera.position.set(target.x, maxHeight, -target.z+2);
         camera.lookAt(target);
         return null;
     }
