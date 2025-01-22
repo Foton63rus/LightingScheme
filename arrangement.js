@@ -16,6 +16,7 @@ export class Arrangement{
     }
 
     loadObjects2Scene(settings){
+        settings.arrangement = this;
         if(this.objects.length == 0){
             console.log('no objects');
             return;
@@ -38,21 +39,8 @@ export class Arrangement{
                         let pos = element.position
                         currentObject.position.set(pos.x,0,-pos.z);
                     }
-                    if(element.height){
-                        let height0;
-                        currentObject.children.forEach(x => {
-                            if(x.name == "Lift"){
-                                height0 = x.position.y;
-                                x.scale.setY(element.height);
-                                
-                            }
-                        });
-                        currentObject.children.forEach(x => {
-                            if(x.name == "Head"){
-                                x.position.setY(height0 + element.height);
-                            }
-                        });
-                    }
+                    //settings.arrangement._liftScaling(element, currentObject);
+                    settings.arrangement._lift2Parts(element, currentObject);
                     if(element.rotation){
                         currentObject.rotateY(-Math.PI/180*element.rotation);
                     }
@@ -119,5 +107,39 @@ export class Arrangement{
         camera.position.set(target.x, maxHeight, -target.z+2);
         camera.lookAt(target);
         return null;
+    }
+
+    _liftScaling(jsonelement, currentObject){
+        if(jsonelement.height){
+            let height0;
+            currentObject.children.forEach(x => {
+                if(x.name == "Lift"){
+                    height0 = x.position.y;
+                    x.scale.setY(jsonelement.height);
+                }
+            });
+            currentObject.children.forEach(x => {
+                if(x.name == "Head"){
+                    x.position.setY(height0 + jsonelement.height);
+                }
+            });
+        }
+    }
+
+    _lift2Parts(jsonelement, currentObject){
+        if(jsonelement.height){
+            let height0;
+            currentObject.children.forEach(x => {
+                if(x.name == "Lift"){
+                    height0 = x.position.y;
+                    x.position.setY(height0 + jsonelement.height-1);
+                }
+            });
+            currentObject.children.forEach(x => {
+                if(x.name == "Head"){
+                    x.position.setY(height0 + jsonelement.height);
+                }
+            });
+        }
     }
 }

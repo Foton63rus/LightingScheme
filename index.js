@@ -71,7 +71,7 @@ function init() {
   // controls
   var controls = new OrbitControls( scene_manager.camera, renderer.domElement );
   controls.addEventListener( 'change', render );
-  controls.minDistance = 10;
+  controls.minDistance = 5;
   controls.maxDistance = 50;
 
   let arrangement = new Arrangement.Arrangement();
@@ -81,7 +81,7 @@ function init() {
   var target = arrangement.centerScene(bounds);
   controls.target = target;
   controls.update();
-  
+
   render();
 }
 
