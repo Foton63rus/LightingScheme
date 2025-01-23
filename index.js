@@ -192,12 +192,12 @@ function render() {
 
 function glbConvert(){
   scene_manager.clearPointer();
-  scene_manager.deleteMarkObjects();
+  //.deleteMarkObjects();
   scene_manager.downloadGLTF();
 }
 
 function usdzConvert(){
   scene_manager.clearPointer();
-  scene_manager.deleteMarkObjects();
+  //scene_manager.deleteMarkObjects();
   scene_manager.downloadUSDZ();
 }
