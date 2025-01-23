@@ -97,6 +97,12 @@ function init() {
     orbit.enabled = ! event.value;
   } );
 
+  keyInit();
+
+  render();
+}
+
+function keyInit(){
   window.addEventListener( 'resize', onWindowResize );
   window.addEventListener( 'keydown', function ( event ) {
 
@@ -160,8 +166,6 @@ function init() {
     }
 
   } );
-
-  render();
 }
 
 function onWindowResize() {
