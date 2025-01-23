@@ -2,11 +2,13 @@ import * as THREE from "three";
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { GLTFExporter } from "three/examples/jsm/exporters/GLTFExporter";
 import { USDZExporter } from 'three/addons/exporters/USDZExporter.js';
+import * as Arrangement from "./arrangement.js";
 
 export class SceneManager{
     settings = {};
     camera = null;
     scene3d = null;
+    currentObject = null;
     
     constructor(settings){
         this.settings = settings;
@@ -42,6 +44,13 @@ export class SceneManager{
                 console.log( `An error happened: ${error}` );
             }
         ); 
+
+        this.settings.arrangement = new Arrangement.Arrangement();
+    }
+
+    load(json){
+        this.settings.arrangement.addObjects(json);
+        this.settings.arrangement.loadObjects2Scene(this.settings);
     }
 
     deleteMarkObjects(){
@@ -71,31 +80,40 @@ export class SceneManager{
         this.scene3d.add( cube3 );
     }
 
-    setPointer(object){
+    setPointer(){
+
         if(!this.settings.pointerModel) return;
 
-        if(this.settings.pointerModel.parent != this.scene3d){
-            this.scene3d.add(this.settings.pointerModel);
-        }
+        this.currentObject.children.forEach( x => {
+            if(x.name === "mark"){
+                x.add(this.settings.pointerModel);
+                this.settings.pointerModel.position.copy(x.position);
+            }
+        });
 
-        const boxSize = new THREE.Box3().setFromObject( object ); 
-        this.settings.pointerModel.position.set( object.position.x, boxSize.getSize(new THREE.Vector3()).y + 0.5, object.position.z );
-
-        let currentColor = this.settings.color[object.mark];
+        let currentColor = this.settings.color[this.currentObject.mark];
         let currentMaterial = this.settings.pointerModel.children[0].material;
         currentMaterial.color.setRGB( currentColor.r, currentColor.g, currentColor.b );
         currentMaterial.emissive.setRGB( currentColor.r, currentColor.g, currentColor.b );
+        
     }
 
     clearPointer(){
         if(this.settings.pointerModel){
-            if(this.settings.pointerModel.parent == this.scene3d){
-                this.scene3d.remove(this.settings.pointerModel);
+            if(this.settings.pointerModel.parent != null){
+                this.settings.pointerModel.parent.remove(this.settings.pointerModel);
+                //this.scene3d.remove(this.settings.pointerModel);
             }
         }else{
             console.log("pointer model 404");
         }
         
+    }
+
+    getSceneCenter(){
+        var bounds = this.settings.arrangement.calculateBounds();
+        var target = this.settings.arrangement.centerScene(bounds);
+        return target;
     }
 
     downloadGLTF() {

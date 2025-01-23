@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import * as Arrangement from "./arrangement.js";
+import { TransformControls } from 'three/addons/controls/TransformControls.js';
+
 import {SceneManager} from "./SceneManager.js";
 
 import testJSON from './testObjects.json';
@@ -21,7 +22,7 @@ let settings = {
     "white":    {r:1, g:1, b:1}, 
   }
 };
-let scene_manager;
+let scene_manager, orbit, transformer, transformer_gizmo;
 
 let clock = new THREE.Clock();
 let delta = 0;
@@ -44,15 +45,25 @@ function onDocumentMouseDown( event ) {
   var intersects = raycaster.intersectObjects( Object.values(settings.objects) );
   //console.log(settings.objects);
   if ( intersects.length > 0 ) {
+    console.log(transformer);
+
     let currentObject = intersects[ 0 ].object.parent;
     currentObject = currentObject.name == "Scene" ? currentObject : currentObject.parent;
     currentObject = currentObject.name == "Scene" ? currentObject : currentObject.parent; //need too
     const boxSize = new THREE.Box3().setFromObject( currentObject ); 
+    scene_manager.currentObject = currentObject;
     currentObject.onClick();
 
-    scene_manager.setPointer(currentObject);
+    scene_manager.setPointer();
+
+
+    transformer.attach( currentObject );
+    transformer.enabled = true;
+    transformer_gizmo = transformer.getHelper();
+    scene_manager.scene3d.add( transformer_gizmo );
+
   }else{
-    scene_manager.clearPointer();
+    //scene_manager.clearPointer();
   }
 }
 
@@ -67,23 +78,106 @@ function init() {
   scene_manager = new SceneManager(settings);
   //scene_manager.createTestObj();
   console.log(scene_manager);
+  scene_manager.load(testJSON);
 
-  // controls
-  var controls = new OrbitControls( scene_manager.camera, renderer.domElement );
-  controls.addEventListener( 'change', render );
-  controls.minDistance = 5;
-  controls.maxDistance = 50;
+  // controls orbit
+  orbit = new OrbitControls( scene_manager.camera, renderer.domElement );
+  orbit.addEventListener( 'change', render );
+  orbit.minDistance = 5;
+  orbit.maxDistance = 50;
 
-  let arrangement = new Arrangement.Arrangement();
-  arrangement.addObjects(testJSON);
-  arrangement.loadObjects2Scene(settings);
-  var bounds = arrangement.calculateBounds();
-  var target = arrangement.centerScene(bounds);
-  controls.target = target;
-  controls.update();
+  var target = scene_manager.getSceneCenter();
+  orbit.target = target;
+  orbit.update();
+
+  transformer = new TransformControls( scene_manager.camera, renderer.domElement );
+  transformer.showY = false;
+  transformer.addEventListener( 'change', render );
+  transformer.addEventListener( 'dragging-changed', function ( event ) {
+    orbit.enabled = ! event.value;
+  } );
+
+  window.addEventListener( 'resize', onWindowResize );
+  window.addEventListener( 'keydown', function ( event ) {
+
+    switch ( event.key ) {
+
+      case 'q':
+        transformer.setSpace( transformer.space === 'local' ? 'world' : 'local' );
+        break;
+
+      case 'Shift':
+        transformer.setTranslationSnap( 1 );
+        transformer.setRotationSnap( THREE.MathUtils.degToRad( 15 ) );
+        transformer.setScaleSnap( 0.25 );
+        break;
+
+      case 'w':
+        transformer.setMode( 'translate' );
+        transformer.showX = true;
+        transformer.showY = false;
+        transformer.showZ = true;
+        break;
+
+      case 'e':
+        transformer.setMode( 'rotate' );
+        transformer.showX = false;
+        transformer.showY = true;
+        transformer.showZ = false;
+        break;
+
+      case '+':
+      case '=':
+        transformer.setSize( transformer.size + 0.1 );
+        break;
+
+      case '-':
+      case '_':
+        transformer.setSize( Math.max( transformer.size - 0.1, 0.1 ) );
+        break;
+
+      case 'Escape':
+        transformer.reset();
+        transformer.enabled = false;
+        scene_manager.scene3d.remove( transformer_gizmo );
+        scene_manager.clearPointer();
+        break;
+
+    }
+
+  } );
+
+  window.addEventListener( 'keyup', function ( event ) {
+
+    switch ( event.key ) {
+
+      case 'Shift':
+        transformer.setTranslationSnap( null );
+        transformer.setRotationSnap( null );
+        transformer.setScaleSnap( null );
+        break;
+
+    }
+
+  } );
 
   render();
 }
+
+function onWindowResize() {
+
+  const aspect = window.innerWidth / window.innerHeight;
+
+  let cameraPersp = scene_manager.camera;
+  cameraPersp.aspect = aspect;
+  cameraPersp.updateProjectionMatrix();
+
+  renderer.setSize( window.innerWidth, window.innerHeight );
+
+  render();
+
+}
+
 
 function render() {
   requestAnimationFrame(render);
@@ -97,11 +191,13 @@ function render() {
 }
 
 function glbConvert(){
+  scene_manager.clearPointer();
   scene_manager.deleteMarkObjects();
   scene_manager.downloadGLTF();
 }
 
 function usdzConvert(){
+  scene_manager.clearPointer();
   scene_manager.deleteMarkObjects();
   scene_manager.downloadUSDZ();
 }
