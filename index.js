@@ -9,6 +9,8 @@ import testJSON from './testObjects.json';
 let renderer
 
 let settings = {
+  transformer: null, 
+  transformer_gizmo: null,
   objects: {},
   color: {
     "red":      {r:1, g:0, b:0},
@@ -60,6 +62,7 @@ function onDocumentMouseDown( event ) {
     transformer.attach( currentObject );
     transformer.enabled = true;
     transformer_gizmo = transformer.getHelper();
+    settings.transformer_gizmo = transformer_gizmo;
     scene_manager.scene3d.add( transformer_gizmo );
 
   }else{
@@ -91,6 +94,7 @@ function init() {
   orbit.update();
 
   transformer = new TransformControls( scene_manager.camera, renderer.domElement );
+  settings.transformer = transformer;
   transformer.showY = false;
   transformer.addEventListener( 'change', render );
   transformer.addEventListener( 'dragging-changed', function ( event ) {
@@ -143,10 +147,7 @@ function keyInit(){
         break;
 
       case 'Escape':
-        transformer.reset();
-        transformer.enabled = false;
-        scene_manager.scene3d.remove( transformer_gizmo );
-        scene_manager.clearPointer();
+        scene_manager.deleteTransformers();
         break;
 
     }
@@ -195,13 +196,13 @@ function render() {
 }
 
 function glbConvert(){
-  scene_manager.clearPointer();
+  scene_manager.deleteTransformers();
   //.deleteMarkObjects();
   scene_manager.downloadGLTF();
 }
 
 function usdzConvert(){
-  scene_manager.clearPointer();
+  scene_manager.deleteTransformers();
   //scene_manager.deleteMarkObjects();
   scene_manager.downloadUSDZ();
 }

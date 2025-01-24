@@ -3,15 +3,19 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { GLTFExporter } from "three/examples/jsm/exporters/GLTFExporter";
 import { USDZExporter } from 'three/addons/exporters/USDZExporter.js';
 import * as Arrangement from "./arrangement.js";
+import { MaterialConverter } from "./MaterialConverter.js";
 
 export class SceneManager{
     settings = {};
     camera = null;
     scene3d = null;
     currentObject = null;
+    material_converter = null;
     
     constructor(settings){
         this.settings = settings;
+
+        this.material_converter = new MaterialConverter();
 
         // scene
         this.scene3d = new THREE.Scene();
@@ -65,11 +69,18 @@ export class SceneManager{
         });
     }
 
+    deleteTransformers(){
+        this.settings.transformer.reset();
+        this.settings.transformer.enabled = false;
+        this.scene3d.remove( this.settings.transformer_gizmo );
+        this.clearPointer();
+    }
+
     createTestObj(){
         const geometry = new THREE.BoxGeometry( 0.5, 0.5, 0.5 ); 
-        const material = new THREE.MeshBasicMaterial( {color: 0x00ff00}); 
-        const material2 = new THREE.MeshBasicMaterial( {color: 0xff0000} ); 
-        const material3 = new THREE.MeshBasicMaterial( {color: 0x0000ff} ); 
+        const material = new THREE.MeshStandardMaterial( {color: 0x00ff00, side:1}); 
+        const material2 = new THREE.MeshStandardMaterial( {color: 0xff0000, side:1} ); 
+        const material3 = new THREE.MeshStandardMaterial( {color: 0x0000ff, side:1} ); 
         const cube = new THREE.Mesh( geometry, material ); 
         const cube2 = new THREE.Mesh( geometry, material2 ); 
         const cube3 = new THREE.Mesh( geometry, material3 );
@@ -116,7 +127,12 @@ export class SceneManager{
         return target;
     }
 
+    fixMaterials(){
+        this.material_converter.Fix(this.scene3d);
+    }
+
     downloadGLTF() {
+        this.fixMaterials();
         const exporter = new GLTFExporter();
         exporter.parse(this.scene3d, function (gltfJson) {
             //console.log(gltfJson);
@@ -134,6 +150,7 @@ export class SceneManager{
       }
 
       async downloadUSDZ() {
+        this.fixMaterials();
         const exporter = new USDZExporter();
         const arraybuffer = await exporter.parseAsync( this.scene3d );
         const blob = new Blob( [ arraybuffer ], { type: 'application/octet-stream' } );
@@ -141,6 +158,7 @@ export class SceneManager{
         link.style.display = 'none';
         document.body.appendChild(link);
         link.href = URL.createObjectURL( blob );
+        console.log(`link: ${link.href}`);
         const jsonString = JSON.stringify(blob);
         link.download = "scene.usdz";
         link.click();
