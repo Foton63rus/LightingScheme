@@ -11,7 +11,7 @@ export class SceneManager{
     scene3d = null;
     currentObject = null;
     material_converter = null;
-    
+
     constructor(settings){
         this.settings = settings;
 
@@ -141,15 +141,21 @@ export class SceneManager{
             const link = document.createElement('a');
             link.style.display = 'none';
             document.body.appendChild(link);
-            const blob = new Blob([jsonString], { type: "application/json" });
-            link.href = URL.createObjectURL( blob );
+            const blob = new Blob([jsonString], { type: 'model/gltf-binary' });
+            const blobUrl = URL.createObjectURL(blob);
             link.download = "scene.glb";
+            //link.href = blobUrl;
+            const intentUrl = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(blobUrl)}#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=https://developers.google.com/ar;end`;
+            link.href = intentUrl;
+            const modelViewer = document.getElementById('my-model-viewer');
+            modelViewer.src = blobUrl;
             link.click();
-            console.log("Download requested");
+            
+            
         }, { binary: true});
-      }
+    }
 
-      async downloadUSDZ() {
+    async downloadUSDZ() {
         this.fixMaterials();
         const exporter = new USDZExporter();
         const arraybuffer = await exporter.parseAsync( this.scene3d );
@@ -157,13 +163,14 @@ export class SceneManager{
         const link = document.createElement('a');
         link.style.display = 'none';
         document.body.appendChild(link);
-        link.href = URL.createObjectURL( blob );
+        link.href =  URL.createObjectURL( blob );
         console.log(`link: ${link.href}`);
+        this.settings.href = link.href;
         const jsonString = JSON.stringify(blob);
         link.download = "scene.usdz";
         link.click();
         console.log("Download requested");
-      }
+    }
 
     animate(){
         if(this.settings.pointerModel){

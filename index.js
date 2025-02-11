@@ -1,12 +1,12 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { TransformControls } from 'three/addons/controls/TransformControls.js';
-
+import { ARButton } from 'three/addons/webxr/ARButton.js';
 import {SceneManager} from "./SceneManager.js";
 
 import testJSON from './testObjects.json';
 
-let renderer
+let renderer;
 
 let settings = {
   transformer: null, 
@@ -36,6 +36,7 @@ render();
 document.addEventListener( 'mousedown', onDocumentMouseDown );
 document.getElementById('btn_glb_convert').onclick = glbConvert;
 document.getElementById('btn_usdz_convert').onclick = usdzConvert;
+document.getElementById('btn_ar').onclick = enterAR;
 
 function onDocumentMouseDown( event ) {    
   event.preventDefault();
@@ -72,7 +73,7 @@ function onDocumentMouseDown( event ) {
 
 function init() {
   // renderer
-  renderer = new THREE.WebGLRenderer( { antialias: true } );
+  renderer = new THREE.WebGLRenderer( { antialias: true, alpha: true } );
   renderer.setPixelRatio( window.devicePixelRatio );
   renderer.setClearColor( 0x000000, 1.0 );
   renderer.setSize( window.innerWidth, window.innerHeight );
@@ -102,7 +103,6 @@ function init() {
   } );
 
   keyInit();
-
   render();
 }
 
@@ -155,22 +155,20 @@ function keyInit(){
   } );
 
   window.addEventListener( 'keyup', function ( event ) {
-
     switch ( event.key ) {
-
       case 'Shift':
         transformer.setTranslationSnap( null );
         transformer.setRotationSnap( null );
         transformer.setScaleSnap( null );
         break;
-
     }
-
   } );
 }
 
 function onWindowResize() {
-
+  if (renderer.xr.isPresenting) {
+    return;
+  }
   const aspect = window.innerWidth / window.innerHeight;
 
   let cameraPersp = scene_manager.camera;
@@ -183,16 +181,21 @@ function onWindowResize() {
 
 }
 
-
 function render() {
-  requestAnimationFrame(render);
+  renderer.setAnimationLoop(function () {
+    renderer.render(scene_manager.scene3d, scene_manager.camera);
+  });
+  if (renderer.xr.isPresenting) {
+    return;
+  }
+  /*requestAnimationFrame(render);
   delta += clock.getDelta();
   if (delta  > interval) {
     scene_manager.animate();
     renderer.render( scene_manager.scene3d, scene_manager.camera );
 
     delta = delta % interval;
-  }
+  }*/
 }
 
 function glbConvert(){
@@ -205,4 +208,19 @@ function usdzConvert(){
   scene_manager.deleteTransformers();
   //scene_manager.deleteMarkObjects();
   scene_manager.downloadUSDZ();
+}
+
+function enterAR() {
+  renderer.xr.enabled = true;
+  orbit.enabled = false;
+  transformer.enabled = false;
+  document.body.appendChild(ARButton.createButton(renderer, { requiredFeatures: ['hit-test'] }));
+
+  renderer.xr.addEventListener('sessionend', () => {
+    orbit.enabled = true; // Восстанавливаем OrbitControls
+    transformer.enabled = true; // Восстанавливаем TransformControls
+    renderer.xr.enabled = false; // Отключаем WebXR
+    document.body.removeChild(arButton); // Убираем кнопку AR
+  });
+  
 }
