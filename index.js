@@ -66,7 +66,23 @@ function onDocumentMouseDown( event ) {
     settings.transformer_gizmo = transformer_gizmo;
     scene_manager.scene3d.add( transformer_gizmo );
 
+    let mode = transformer.getMode( );
+    if(mode === 'translate'){
+      transformer.setMode( 'rotate' );
+      transformer.showX = false;
+      transformer.showY = true;
+      transformer.showZ = false;
+    }else{
+      transformer.setMode( 'translate' );
+      transformer.showX = true;
+      transformer.showY = false;
+      transformer.showZ = true;
+    }
+
   }else{
+    if(transformer_gizmo){
+      scene_manager.scene3d.remove( transformer_gizmo );
+    }
     //scene_manager.clearPointer();
   }
 }
